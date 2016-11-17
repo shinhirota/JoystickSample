@@ -1,6 +1,8 @@
 #include "HelloWorldScene.h"
 #include "SimpleAudioEngine.h"
 
+#include "glfw3.h"
+
 USING_NS_CC;
 
 Scene* HelloWorld::createScene()
@@ -55,6 +57,7 @@ bool HelloWorld::init()
     // add a label shows "Hello World"
     // create and initialize a label
     
+	/*
     auto label = Label::createWithTTF("Hello World", "fonts/Marker Felt.ttf", 24);
     
     // position the label on the center of the screen
@@ -63,6 +66,7 @@ bool HelloWorld::init()
 
     // add the label as a child to this layer
     this->addChild(label, 1);
+	*/
 
     // add "HelloWorld" splash screen"
     auto sprite = Sprite::create("HelloWorld.png");
@@ -73,6 +77,15 @@ bool HelloWorld::init()
     // add the sprite as a child to this layer
     this->addChild(sprite, 0);
     
+
+	_label = Label::createWithTTF("", "fonts/arial.ttf", 18);
+	_label->setPosition(Vec2(origin.x + visibleSize.width / 2,
+		origin.y + visibleSize.height - _label->getContentSize().height));
+	_label->setAnchorPoint(Vec2(0.5, 1));
+	this->addChild(_label, 1);
+
+	scheduleUpdate();
+
     return true;
 }
 
@@ -92,4 +105,43 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
     //_eventDispatcher->dispatchEvent(&customEndEvent);
     
     
+}
+
+void HelloWorld::update(float dt)
+{
+	static char buff[256];
+
+	std::ostringstream ss;
+	ss.precision(2);
+
+	bool isFound = false;
+
+	for (int i = 0; i <= GLFW_JOYSTICK_LAST; i++) {
+
+		if (glfwJoystickPresent(i)) {
+
+			ss << "JOY#" << i << ": ";
+
+			int buttonNum;
+			int axisNum;
+			const unsigned char* buttons;
+			const float* axes;
+
+			buttons = glfwGetJoystickButtons(i, &buttonNum);
+			axes = glfwGetJoystickAxes(i, &axisNum);
+
+			for (int j = 0; j < buttonNum; j++)	ss << (int)buttons[j];
+			ss << ": ";
+			for (int j = 0; j < axisNum; j++) ss << std::fixed << axes[j] << " ";
+			ss << "\n";
+
+			isFound = true;
+		}
+	}
+	if (!isFound) {
+		ss << "No joysticks found.";
+	}
+
+	_label->setString(ss.str().c_str());
+
 }
